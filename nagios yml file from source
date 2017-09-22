@@ -1,0 +1,111 @@
+---
+- name: playbook for nagios installation on cetnt7
+  hosts: j
+  tasks:
+  - name: create nagcmd group
+    group: name=nagcmd state=present
+  - name: create nagios user
+    user: name=nagios group=nagcmd shell=/bin/nologin append=yes state=present
+  - name: install nagios dependencies packages
+    yum: name="{{item}}" state=present
+    with_items:
+      - epel-release
+      - httpd
+      - gcc
+      - glibc
+      - glibc-common
+      - gd
+      - gd-devel
+      - make
+      - net-snmp
+      - openssl-devel
+      - xinetd
+      - unzip
+  - name: start httpd service
+    service: name=httpd state=started enabled=yes
+  - name: add to firewalld
+    firewalld: service=http permanent=true state=enabled
+  - name: source download from net
+    unarchive: src=https://assets.nagios.com/downloads/nagioscore/releases/nagios-4.3.2.tar.gz  dest=/opt remote_src=yes
+  - name: nagios command1
+    command: ./configure --with-nagios-group=nagios --with-command-group=nagcmd
+    args:
+      chdir: /opt/nagios-4.3.2
+  - name: nagios command2
+    command: make all
+    args:
+      chdir: /opt/nagios-4.3.2
+  - name: nagios command3
+    command: make install
+    args:
+      chdir: /opt/nagios-4.3.2
+  - name: nagios command4
+    command: make install-commandmode
+    args:
+      chdir: /opt/nagios-4.3.2
+  - name: nagios command5
+    command: make install-init
+    args:
+      chdir: /opt/nagios-4.3.2
+  - name: nagios command6
+    command: make install-config
+    args:
+      chdir: /opt/nagios-4.3.2
+  - name: nagios command7
+    command: make install-webconf
+    args:
+      chdir: /opt/nagios-4.3.2
+  - name: nagios command8
+    command: make install-exfoliation
+    args:
+      chdir: /oopt/nagios-4.3.2
+
+  - name: download nagios plugins
+    unarchive: src=https://nagios-plugins.org/download/nagios-plugins-2.2.1.tar.gz dest=/opt remote_src=yes
+  - name:  plugins command1
+    command: ./configure --with-nagios-user=nagios --with-nagios-group=nagios
+    args:
+      cgdir: /opt/nagios-plugins-2.2.1
+  - name: plugins command2
+    command: make
+    args:
+      chdir: /opt/nagios-plugins-2.2.1
+  - name: plugins command3
+    command: make install
+    args:
+      chdir: /opt/nagios-plugins-2.2.1
+  - name: download nrpe
+    unarchive: src=http://downloads.sourceforge.net/project/nagios/nrpe-2.x/nrpe-2.15/nrpe-2.15.tar.gz copy=no dest=/opt remote_src=yes
+  - name: nrpe command1
+    command: ./configure --enable-command-args --with-nagios-user=nagios --with-nagios-group=nagios --with-ssl=/usr/bin/openssl --with-ssl-lib=/usr/lib/x86_64-linux-gnu
+    args:
+      chdir: /opt/nrpe-*
+ - name: nrpe command2
+    command: make all
+    args:
+      chdir: /opt/nrpe-*
+  - name: nrpe command3
+    command: make install
+    args:
+      chdir: /opt/nrpe-*
+  - name: nrpe command4
+    command: make install-xinetd
+    args:
+      chdir: /opt/nrpe-*
+  - name: nrpe command5
+    command: make install-daemon-config
+    args:
+      chdir: /opt/nrpe-*
+  - name: use linein file
+    lineinfile: path=/etc/xinetd.d/nrpe regexp="^only_from = 127.0.0.1" line=only_from = 127.0.0.1 "{{ansible_hostname}}"
+  - name: start the xined service
+    service: name=xinetd state=started
+  - name: use line file
+    lineinfile: path=/usr/local/nagios/etc/nagios.cfg regexp="^#cfg_dir=/usr/local/nagios/etc/servers" line="cfg_dir=/usr/local/nagios/etc/servers"
+  - name: create directory
+    file: path=/usr/local/nagios/etc/servers state=directory
+  - name: start the nagios service
+    service: name="{{item}}" state=restarted enabled=yes
+    with_items:
+      - "nagios"
+      - "httpd"
