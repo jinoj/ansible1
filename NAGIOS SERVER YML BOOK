@@ -1,0 +1,76 @@
+---
+- name: playbook for nagios installation on  fresh aws cetnt7
+  hosts: a
+  vars:
+    nagiosadmin_password: nagiosadmin
+  tasks:
+  - name: install nagios dependencies packages
+    yum: name="{{item}}" state=present
+    with_items:
+      - firewalld
+      - httpd
+      - gcc
+      - glibc
+      - glibc-common
+      - gd
+      - gd-devel
+      - net-snmp
+      - php-cli
+      - php
+  - name: create nagcmd group
+    group: name=nagcmd state=present
+  - name: create nagios user
+    user: name=nagios groups=nagcmd shell=/bin/nologin append=yes state=present
+  - name: exit user add to group
+    user: name=apache groups=nagcmd
+  - name: start httpd service
+    service: name="{{item}}" state=started enabled=yes
+    with_items:
+      - httpd
+      - firewalld
+ - name: source download from net
+    unarchive: src=https://assets.nagios.com/downloads/nagioscore/releases/nagios-4.3.1.tar.gz  dest=/opt remote_src=yes
+  - name: nagios command1
+    command: "{{item}}"
+    args:
+      chdir: /opt/nagios-4.3.1
+    with_items:
+      - ./configure --with-command-group=nagcmd
+      - make all
+      - make install
+      - make install-init
+      - make install-config
+      - make install-commandmode
+      - make install-webconf
+  - name: assign ht password
+    command: htpasswd -c /usr/local/nagios/etc/htpasswd.users nagiosadmin {{nagiosadmin_password}}
+  - name: start the httpd service
+    service: name=httpd state=restarted
+  - name: download nagios plugins
+    unarchive: src=http://nagios-plugins.org/download/nagios-plugins-2.1.4.tar.gz dest=/opt remote_src=yes
+  - name:  plugins command
+    command: "{{item}}"
+    args:
+      cgdir: /opt/nagiois-plugins-2.1.4
+    with_items:
+      - ./configure --with-nagios-user=nagios --with-nagios-group=nagios
+      -  make
+      -  make install
+  - name: verify the nagios command
+    command: /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg
+- name: add to firewalld
+    firewalld: service="{{item}}" state=enabled permanent=true
+    with_items:
+      - http
+      - https
+  - name: deamon-reload
+    systemd: daemon_reload=yes
+  - name: start the nagios service
+    service: name="{{item}}" state=restarted enabled=yes
+    with_items:
+      - "nagios"
+      - "httpd"
+  - name: check nagios status
+    shell: curl localhost/nagios
+                                                                                                                     74,1          Bot
+                                                                                                                     1,1           Top
