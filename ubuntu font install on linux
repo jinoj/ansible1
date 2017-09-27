@@ -1,0 +1,10 @@
+---
+- hosts: j
+  tasks:
+  - name: ubuntu font install
+    unarchive: src=http://dl.1001fonts.com/ubuntu.zip  dest=/usr/share/fonts remote_src=yes
+  - name: install on cent packages
+    shell: fc-cache
+    args:
+      chdir: /usr/share/fonts/ubuntu-font-family-0.80
+:wq!
