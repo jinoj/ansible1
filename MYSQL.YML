@@ -1,0 +1,16 @@
+---
+- name: mariadb database create
+  hosts: j
+  tasks:
+  - name: mariadb database create
+    mysql_db: name=radiantdata state=present
+
+  - name: backup database
+    mysql_db: name=radiantdata state=dump  target=/tmp/{{ inventory_hostname }}.sql
+
+  - name: Restore database
+    mysql_db:  name=radiantdata state=import target=/tmp/{{ inventory_hostname }}.sql
+
+  - name: user creation on mysql
+    mysql_user: name=radiant host=localhost  password=12345  priv='*.*:ALL'  state=present
+~                                                                                              
