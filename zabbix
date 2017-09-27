@@ -48,8 +48,8 @@ vim /etc/php.ini
       - 10051
       - 10050
 
-  - name: add to selinux
-    seboolean: name=httpd_can_connect_zabbix=1  state=yes  persistent=yes
+  - name: add to selinux setsebool -P httpd_can_network_connect on
+    seboolean: name=httpd_can_connect  state=yes  persistent=yes
   - name: start the service
     service: name="{{item}}" state=started enabled=yes
     with_items:
