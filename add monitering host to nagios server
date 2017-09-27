@@ -1,0 +1,38 @@
+--
+- name: linux host monitering remote host
+  hosts: a
+  vars:
+    var1:
+      -  "{{ansible_all_ipv4_addresses}}"
+  tasks:
+  - name: playbook for process
+    yum: name="{{item}}" state=present
+    with_items:
+      - rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+      - nrpe
+      - nagios-plugins-all
+  - name: some chnages in nrpe ocnfiguration
+    lineinfile: path=/etc/nagios/nrpe.cfg regexp='allowed_hosts=127.0.0.1,::1' line='allowed_hosts=127.0.0.1,{{var1}}'
+
+  - name: service start nrpe
+    service: name=nrpe state=started enabled=yes
+
+  - name: restart the nrpe service
+    service: name=nrpe state=restarted
+
+
+---
+- name: nagios server host add to remote host
+  hosts: j
+  tasks:
+  - name: install packages nrpe
+    yum: name="{{item}}" state=present
+    with_items:
+      - rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+      - nagios-plugins-nrpe
+
+  - name: entr use line in file
+    lineinfile: path=/etc/nagios/nrpe.cfg regexp='#cfg_dir=/usr/local/nagios/etc/servers' line='cfg_dir=/usr/local/nagios/etc/servers'
+  - name: create server directory
+    file: path=/usr/local/nagios/etc/servers state=directory
+                                                                                                                                                  1,1           Top
