@@ -1,0 +1,58 @@
+---
+- name: ansible plays
+  hosts: c
+  tasks:
+  - name: batch update
+    yum: name="*" state=latest
+  - name: install lamp setup
+    yum: name=httpd state=present
+  - name: start the service
+    service: name=httpd state=started enabled=yes
+  - name: change hostname
+    hostname: name=cent7
+    when: ansible_hostname == "cent7"
+  - name: change hostname
+    hostname: name=cent6
+    when: ansible_hostname == "cent6"
+  - name: check apache version
+    shell: httpd -v | grep Apache | awk '{printf $3 "\n" }'
+    when: ansible_hostname == "cent6"
+    register: re
+  - name: main configuration apache edit use lineinfile
+    lineinfile: path=/etc/httpd/conf/httpd.conf backup=yes  regexp={{item.word}} line={{item.work}}
+    with_items:
+      - { word: 'ServerSignature On', work: 'ServerSignature Off' }
+      - { word: 'ServerTokens OS', work: 'ServerTokens Prod' }
+      - { word: 'KeepAlive Off', work: 'KeepAlive On' }
+    when: ansible_distribution_version == "6.9"
+  - name: main conf file edit in httpd 
+    blockinfile: 
+      path: /etc/httpd/conf/httpd.conf 
+      block: | 
+        ServerSignature Off
+        ServerTokens Prod
+        KeepAlive On
+        TraceEnable Off
+    when: ansible_hostname == "cent7"
+  - name: reload the httpd service
+    service: name=httpd state=reloaded
+    ignore_errors: True
+  - name: install pakages
+    yum: name={{item}} state=present
+    with_items:
+      - mysql-server
+      - php
+      - php-mysql
+    when: ansible_hostname == "cent6"
+  - name: install pakages
+    yum: name=http://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm state=present
+    when: ansible_hostname == "cent7"
+  - name: install pakages
+    yum: name={{item}} state=present
+    with_items:
+      - mysql-server
+      - php
+      - php-mysql
+    when: ansible_hostname == "cent7"
+  - name: start the service
+    service: name=mysqld state=restarted
