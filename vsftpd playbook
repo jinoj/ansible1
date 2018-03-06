@@ -20,6 +20,7 @@
       - { ex: 'listen=NO', lin: 'listen=YES' }
       - { ex: 'listen_ipv6=YES', lin: 'listen_ipv6=NO' }
       - { ex: 'xferlog_std_format=YES', lin: 'xferlog_std_format=NO' }
+      - { ex: '#chroot_local_user=YES', lin: 'chroot_local_user=YES' }
     when: ansible_distribution_major_version == "7" or ansible_distribution == "CentOS"
   - name: add the file in vsftpd location
     blockinfile:
