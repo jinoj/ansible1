@@ -1,0 +1,47 @@
+---
+- name: ansible play for httpd installtion
+  hosts: 192.168.5.100
+  vars:
+    value:
+      value1: httpd
+      value2: http
+      value3: firewalld
+  tasks:
+  - name: installtion on server
+    yum: name="{{value.value1}}" state=present
+  - name: add the file in httpd location
+    blockinfile:
+      path: /etc/httpd/conf/httpd.conf
+      block: |
+        ServerSignature Off
+        ServerTokens Prod
+        TraceEnable off
+        KeepAlive On
+  - name: touch file create in webserver content
+    file: path=/var/www/html/index.html state=touch owner=apache group=apache #recurse=yes
+  - name: add the file in httpd location
+    blockinfile:
+      path: /var/www/html/index.html
+      block: |
+        <html>
+        <body>
+        <div style="width: 100%; font-size: 40px; font-weight: bold; text-align: center;">
+        Test Page
+        </div>
+        </body>
+        </html>
+  - name: start the service
+    systemd: name="{{value.value1}}" state=started enabled=yes
+  - name: add to service in system firewalld
+    firewalld: service="{{assign.assign2}}" permanent=true state=enabled
+  - name: restart the service
+    systemd: name="{{item}}" state=restarted
+    with_items:
+      - "{{value.value1}}"
+      - "{{value.value3}}"
+  - name: uptimes
+    shell: curl http://localhost
+    register: shell_result
+  - name: msessgae
+    debug:
+      var: shell_result.stdout_lines
