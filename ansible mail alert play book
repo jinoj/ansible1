@@ -1,0 +1,14 @@
+---
+- name: jhino
+  hosts: 192.168.5.210
+  tasks:
+  - name: httpd count
+    shell: pgrep httpd | wc -l
+  - name: jinok
+    mail:
+      host: localhost
+      port: 25
+      to: jino <jinojoe@gmail.com>
+      cc: linux <linuxadmin@radiantcashservices.com>
+      subject: Ansible-report
+      body: 'System {{ ansible_hostname }} has been successfully provisioned.'
