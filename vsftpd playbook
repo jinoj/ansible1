@@ -39,7 +39,7 @@
   - name: cretae directory
     file: path=/etc/vsftpd/users state=directory mode=0600
   - name: directory assign file permission
-    file: path={{assign.assign3}} owner={{assign.assign1}} group={{assign.assign1}} mode=0754 recurse=yes
+    file: path={{assign.assign3}} owner={{assign.assign1}} group={{assign.assign1}} mode=755 recurse=yes
   - name: touch file create depends on user
     file: path=/etc/vsftpd/users/{{assign.assign1}} state=touch
   - name: create log file
