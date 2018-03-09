@@ -1,0 +1,20 @@
+---
+- name: backup mysql
+  hosts: 192.168.5.207
+  vars:
+    - exclude_db:
+      - "jino"
+      - "gino"
+      - "eno"
+      - "jeno"
+  tasks:
+    - name: get db names
+      shell: 'ls /mnt'
+      register: dblist
+    - name: backup databases
+      archive:
+        path: "/mnt/{{ item }}"
+        dest: "/tmp/date.tar.gz"
+        format: gz
+      with_items: "{{ dblist.stdout_lines }}"
+      #with_items: "{{ dblist.stdout_lines | difference(exclude_db) }}"
