@@ -1,0 +1,16 @@
+---
+- hosts: 183.82.119.187
+  tasks:
+  - name: patch Update
+    yum: name="*" state=latest
+  - name: test result
+    ignore_errors: yes
+    shell:  grep Mar 09 /var/log/yum.log
+    register: updated
+  - name: mail result
+    mail:
+      to: linuxadmin@radiantcashservices.com
+      subject: "updates applied to {{ ansible_hostname }} today"
+      body: "{{ item }}"
+    with_items: "{{ updated.stdout }}"  #"{{ updated.results|map(attribute='stdout_lines')|list }}"
+    when: updated.stdout
