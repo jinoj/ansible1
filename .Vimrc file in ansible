@@ -1,0 +1,8 @@
+autocmd Filetype yaml setlocal tabstop=2 ai colorcolumn=1,3,5,7,9,80
+
+
+or 
+
+set ai
+set tabstop=2
+set expandtab
