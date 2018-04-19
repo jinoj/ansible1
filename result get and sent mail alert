@@ -28,3 +28,43 @@
     with_items: "{{ counttc.stdout }}"
     #with_items: "{{ counttc.results|map(attribute='stdout_lines')|list }}"
     #when: counttc.stdout
+=====================================================
+
+ mail_body.j2
+# templates/mail_body.j2
+{% for host in play_hosts %}
+The {{ host }} says {{ hostvars[host]['result']['stdout'] }}
+{% endfor %}
+play.yml
+---
+- hosts: all
+  gather_facts: False
+  connection: local
+  tasks:
+    - shell: echo "hello"
+      register: result
+      
+    - mail:
+        host: example.com
+        port: 25
+        to: test@example.com
+        subject: Test
+        body: "{{ lookup('template', 'templates/mail_body.j2') }}"
+      delegate_to: localhost
+      run_once: True
+
+======================================================
+---
+- hosts: all
+  gather_facts: False
+  #connection: 192.168.5.207
+  tasks:
+  - shell: echo "hello"
+    register: result
+  - name: esult
+    mail:
+      to: linuxadmin@radiantcashservices.com
+      subject: Test
+      body: "{{ lookup('template', 'templates/mail_body.j2') }}"
+    delegate_to: 192.168.5.207
+    run_once: True
