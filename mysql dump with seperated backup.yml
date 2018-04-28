@@ -18,3 +18,6 @@
         login_user: root
         login_password: "{{ vault_root_passwd }}"
       with_items: "{{ dblist.stdout_lines | difference(exclude_db) }}"
+
+
+show status where `variable_name` = 'Threads_connected';
