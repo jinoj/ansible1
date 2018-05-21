@@ -29,3 +29,20 @@
  10     debug:
  11       msg: "{{ echo.results }}"
  12       #msg: "{{ echo.results|map(attribute='stdout_lines')| list }}"
+ 
+   1 ---
+  2 - hosts: 192.168.5.100
+  3   tasks: 
+  4   - shell: "{{ item }}"
+  5     with_items:
+  6       - df -TH
+  7       - id -un
+  8     register: my_result
+  9     #  - name: Fail if return code is not 0
+ 10     # debug:
+ 11       #  msg: "{{ echo.results }}"
+ 12       #msg: "{{ echo.results|map(attribute='stdout_lines')| list }}"
+ 13   - debug:
+ 14       msg: The line was {{item.stdout}}                                                                                                            
+ 15     with_items: "{{my_result.results}}"
+
