@@ -1,0 +1,31 @@
+---
+  2 - hosts: 192.168.5.100                                                                                                                             
+  3   tasks:
+  4   - shell: "{{ item }}"
+  5     with_items:
+  6       - df -TH
+  7       - id -un
+  8     register: my_result
+  9   - name: Fail if return code is not 0
+ 10     debug:
+ 11       msg: "{% set output = [] %}\
+ 12         {% for x in (my_result.results | map(attribute='stdout')) %}\
+ 13           {{ output.append( 'The result was: ' ~ x ) }}\
+ 14         {% endfor %}\
+ 15         {{output}}"
+ 16  
+
+
+
+1 ---                                                                                                                                                
+  2 - hosts: 192.168.5.100
+  3   tasks:
+  4   - shell: "{{ item }}"
+  5     with_items:
+  6       - df -TH
+  7       - id -un
+  8     register: echo
+  9   - name: Fail if return code is not 0
+ 10     debug:
+ 11       msg: "{{ echo.results }}"
+ 12       #msg: "{{ echo.results|map(attribute='stdout_lines')| list }}"
