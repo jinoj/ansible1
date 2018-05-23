@@ -1,0 +1,25 @@
+ b.yaml                                                                                                                                      buffers 
+  1 ---                                                                                                                                                
+  2 - name: get system detail
+  3   hosts: l #192.168.5.207 192.168.5.100
+  4   tasks:
+  5   - debug:
+  6       msg: "{{ item }}"
+  7     loop:
+  8       - "System Name = {{ ansible_hostname }}, FDQN Name = {{ ansible_fqdn }},  Architecture = {{ ansible_architecture }}"
+  9       - "System Date = {{ ansible_date_time.date }}, Time = {{ ansible_date_time.time }}"
+ 10       - "System OS Family = {{ ansible_os_family }}, Distribution = {{ansible_distribution}}, Package Manager = {{ ansible_pkg_mgr }}, Version =       {{ ansible_distribution_version}}"
+ 11       - "System Process Core = {{ ansible_processor_cores }}, Processor Count = {{ ansible_processor_count }}, Threads Per Core = {{                   ansible_processor_threads_per_core}}, VCpus = {{ ansible_processor_vcpus}}"
+ 12       - "System IP Address = {{ ansible_default_ipv4.address }}, Alias = {{ ansible_default_ipv4.alias }}, Gateway = {{ ansible_default_ipv4.          gateway }}, Netmask IP = {{ ansible_default_ipv4.netmask }}, Network IP = {{  ansible_default_ipv4.network }} Interface List =  {{                     ansible_interfaces | list }}"
+ 13       - "DNS Details = {{ ansible_dns.nameservers}}"
+ 14       - "System Kernel = {{ ansible_kernel }}"
+ 15       - "System Mount = {{ ansible_mounts|map(attribute='mount') | list}}"
+ 16     no_log: true
+ 17     register: my_result
+ 18   - name: resultssssss
+ 19     debug:
+ 20       msg: "{% set output = [] %}\
+ 21         {% for x in (my_result.results | map(attribute='msg')) %}\
+ 22           {{ output.append( x ) }}\
+ 23         {% endfor %}\
+ 24         {{output}}"
